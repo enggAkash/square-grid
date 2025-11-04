@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<MainViewModel>()
     private val defaultScope = CoroutineScope(Dispatchers.Default)
+    private val adapter = VerticalRecyclerViewAdapter(arrayListOf())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,10 +66,17 @@ class MainActivity : AppCompatActivity() {
         }
         //endregion
 
+        mainBinding.resetButton.setOnClickListener {
+            generateGridAndShow()
+        }
 
-        val adapter = VerticalRecyclerViewAdapter(arrayListOf())
         mainBinding.verticalRv.adapter = adapter
+        mainBinding.verticalRv.setHasFixedSize(true)
 
+        generateGridAndShow()
+    }
+
+    private fun generateGridAndShow() {
         defaultScope.launch {
             viewModel.generateSquareGrid()
             Log.d(TAG, "onCreate: ${viewModel.squareGrid}")
@@ -81,7 +89,6 @@ class MainActivity : AppCompatActivity() {
                 adapter.resetList(viewModel.squareGrid)
             }
         }
-
     }
 
     override fun onResume() {

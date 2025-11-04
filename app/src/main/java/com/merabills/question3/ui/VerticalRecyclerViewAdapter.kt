@@ -46,6 +46,7 @@ class VerticalVh(private val itemBinding: VerticalVhBinding) :
 
     init {
         itemBinding.horizontalRv.adapter = horizontalRecyclerViewAdapter
+        itemBinding.horizontalRv.setHasFixedSize(true)
     }
 
     fun bind(myRow: MyRow) {

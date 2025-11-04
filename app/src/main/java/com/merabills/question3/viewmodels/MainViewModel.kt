@@ -39,7 +39,7 @@ class MainViewModel : ViewModel() {
      */
     fun getBgColor(): Int {
         val predefinedColors =
-            intArrayOf(Color.GRAY, Color.RED, Color.CYAN, Color.LTGRAY, Color.MAGENTA, Color.YELLOW)
+            intArrayOf(Color.GRAY, Color.RED, Color.CYAN, Color.LTGRAY, Color.MAGENTA, Color.YELLOW, Color.GREEN)
 
         return predefinedColors[(Math.random() * predefinedColors.count()).toInt()]
     }
