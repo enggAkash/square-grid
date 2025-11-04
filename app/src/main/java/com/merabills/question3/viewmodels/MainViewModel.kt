@@ -21,6 +21,9 @@ class MainViewModel : ViewModel() {
             val currentRow = MyRow(arrayListOf<MySquare>())
 
             for (i in 0 until currentRowCount) {
+                if (currentSquare >= SQUARE_TO_GENERATE) {
+                    break
+                }
                 currentRow.squares.add(getSquare(currentSquare++))
             }
 
