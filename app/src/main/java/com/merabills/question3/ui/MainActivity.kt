@@ -1,7 +1,6 @@
 package com.merabills.question3.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -14,13 +13,7 @@ import androidx.metrics.performance.JankStats
 import com.merabills.question3.R
 import com.merabills.question3.databinding.ActivityMainBinding
 import com.merabills.question3.viewmodels.MainViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicInteger
-
-private const val TAG = "MainActivity"
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,7 +23,7 @@ class MainActivity : AppCompatActivity() {
     //endregion
 
     private val viewModel by viewModels<MainViewModel>()
-    private val defaultScope = CoroutineScope(Dispatchers.Default)
+    private lateinit var gridCoordinator: GridCoordinator
 
     private val adapter: VerticalRecyclerViewAdapter =
         VerticalRecyclerViewAdapter(
@@ -75,33 +68,21 @@ class MainActivity : AppCompatActivity() {
         }
         //endregion
 
+        gridCoordinator = GridCoordinator(viewModel, adapter)
+
         mainBinding.resetButton.setOnClickListener {
-            generateGridAndShow()
-            mainBinding.verticalRv.smoothScrollToPosition(0)
+            gridCoordinator.generateGridAndShow {
+                mainBinding.verticalRv.smoothScrollToPosition(0)
+            }
         }
 
         mainBinding.verticalRv.adapter = adapter
         mainBinding.verticalRv.setHasFixedSize(true)
 
         if (viewModel.squareGrid.isEmpty()) {
-            generateGridAndShow()
+            gridCoordinator.generateGridAndShow()
         } else {
-            adapter.resetList(viewModel.squareGrid)
-        }
-    }
-
-    private fun generateGridAndShow() {
-        defaultScope.launch {
-            viewModel.generateSquareGrid()
-            Log.d(TAG, "onCreate: ${viewModel.squareGrid}")
-
-            for (i in 0 until viewModel.squareGrid.size) {
-                Log.d(TAG, "onCreate: Row[$i] size {${viewModel.squareGrid[i].squares.size}}]")
-            }
-
-            withContext(Dispatchers.Main) {
-                adapter.resetList(viewModel.squareGrid)
-            }
+            gridCoordinator.updateAdapterWithExistingGrid()
         }
     }
 
