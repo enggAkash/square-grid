@@ -7,8 +7,12 @@ import com.merabills.question3.databinding.HorizontalVhBinding
 import com.merabills.question3.models.MySquare
 
 
-class HorizontalRecyclerViewAdapter(val rowSquares: ArrayList<MySquare>) :
-    RecyclerView.Adapter<HorizontalVh>() {
+class HorizontalRecyclerViewAdapter(
+    val rowSquares: ArrayList<MySquare>,
+    val onRowItemDelete: (Int) -> Unit,
+    val onRowEmpty: () -> Unit
+) :
+    RecyclerView.Adapter<HorizontalRecyclerViewAdapter.HorizontalVh>() {
 
     override fun onCreateViewHolder(
         viewGroup: ViewGroup,
@@ -23,25 +27,44 @@ class HorizontalRecyclerViewAdapter(val rowSquares: ArrayList<MySquare>) :
         )
     }
 
-    override fun onBindViewHolder(viewHolder: HorizontalVh, position: Int) {
-        viewHolder.bind(rowSquares[position])
+    override fun onBindViewHolder(
+        viewHolder: HorizontalVh,
+        position: Int
+    ) {
+        viewHolder.bind(position)
     }
 
     override fun getItemCount() = rowSquares.size
+
+    fun deleteItem(position: Int) {
+        rowSquares.removeAt(position)
+        notifyItemRemoved(position)
+
+        onRowItemDelete.invoke(position)
+        if (rowSquares.isEmpty()) {
+            onRowEmpty.invoke()
+        }
+    }
 
     fun resetList(newRowSquares: ArrayList<MySquare>) {
         this.rowSquares.clear()
         this.rowSquares.addAll(newRowSquares)
         notifyDataSetChanged()
     }
-}
 
-class HorizontalVh(val itemBinding: HorizontalVhBinding) :
-    RecyclerView.ViewHolder(itemBinding.root) {
+    inner class HorizontalVh(val itemBinding: HorizontalVhBinding) :
+        RecyclerView.ViewHolder(itemBinding.root) {
 
-    fun bind(mySquare: MySquare) {
-        itemBinding.squareTv.text = mySquare.text.toString()
-        itemBinding.squareTv.setBackgroundColor(mySquare.bgColor)
+        init {
+            itemBinding.root.setOnClickListener {
+                deleteItem(bindingAdapterPosition)
+            }
+        }
+
+        fun bind(position: Int) {
+            itemBinding.squareTv.text = rowSquares[position].text.toString()
+            itemBinding.squareTv.setBackgroundColor(rowSquares[position].bgColor)
+        }
+
     }
-
 }

@@ -8,8 +8,12 @@ import com.merabills.question3.models.MyRow
 import com.merabills.question3.models.MySquare
 
 
-class VerticalRecyclerViewAdapter(val squareGrid: ArrayList<MyRow>) :
-    RecyclerView.Adapter<VerticalVh>() {
+class VerticalRecyclerViewAdapter(
+    private val squareGrid: ArrayList<MyRow>,
+    private val onRowItemDelete: (Int, Int) -> Unit,
+    private val onRowRemoved: (Int) -> Unit
+) :
+    RecyclerView.Adapter<VerticalRecyclerViewAdapter.VerticalVh>() {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
@@ -27,32 +31,44 @@ class VerticalRecyclerViewAdapter(val squareGrid: ArrayList<MyRow>) :
         holder: VerticalVh,
         position: Int
     ) {
-        holder.bind(squareGrid[position])
+        holder.bind(position)
     }
 
     override fun getItemCount() = squareGrid.size
+
+    fun deleteItem(position: Int) {
+        squareGrid.removeAt(position)
+        notifyItemRemoved(position)
+
+        onRowRemoved.invoke(position)
+    }
 
     fun resetList(newSquareGrid: ArrayList<MyRow>) {
         this.squareGrid.clear()
         this.squareGrid.addAll(newSquareGrid)
         notifyDataSetChanged()
     }
-}
 
-class VerticalVh(private val itemBinding: VerticalVhBinding) :
-    RecyclerView.ViewHolder(itemBinding.root) {
-    val horizontalRecyclerViewAdapter: HorizontalRecyclerViewAdapter =
-        HorizontalRecyclerViewAdapter(arrayListOf<MySquare>())
+    inner class VerticalVh(private val itemBinding: VerticalVhBinding) :
+        RecyclerView.ViewHolder(itemBinding.root) {
+        val horizontalRecyclerViewAdapter: HorizontalRecyclerViewAdapter =
+            HorizontalRecyclerViewAdapter(
+                rowSquares = arrayListOf<MySquare>(),
+                onRowItemDelete = { itemPosition ->
+                    onRowItemDelete(bindingAdapterPosition, itemPosition)
+                },
+                onRowEmpty = {
+                    deleteItem(bindingAdapterPosition)
+                })
 
-    init {
-        itemBinding.horizontalRv.adapter = horizontalRecyclerViewAdapter
-        itemBinding.horizontalRv.setHasFixedSize(true)
+        init {
+            itemBinding.horizontalRv.adapter = horizontalRecyclerViewAdapter
+            itemBinding.horizontalRv.setHasFixedSize(true)
+        }
+
+        fun bind(position: Int) {
+            horizontalRecyclerViewAdapter.resetList(squareGrid[position].squares)
+        }
+
     }
-
-    fun bind(myRow: MyRow) {
-
-        val filteredMyRow = ArrayList(myRow.squares.filter { it.isAdded })
-        horizontalRecyclerViewAdapter.resetList(filteredMyRow)
-    }
-
 }

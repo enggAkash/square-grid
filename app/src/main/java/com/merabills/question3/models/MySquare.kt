@@ -6,7 +6,5 @@ data class MySquare(
     val text: Int,
 
     @field:ColorInt
-    val bgColor: Int,
-
-    val isAdded: Boolean = true
+    val bgColor: Int
 )

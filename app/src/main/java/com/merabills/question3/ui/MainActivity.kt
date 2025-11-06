@@ -19,7 +19,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.getValue
 
 private const val TAG = "MainActivity"
 
@@ -32,7 +31,17 @@ class MainActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<MainViewModel>()
     private val defaultScope = CoroutineScope(Dispatchers.Default)
-    private val adapter = VerticalRecyclerViewAdapter(arrayListOf())
+
+    private val adapter: VerticalRecyclerViewAdapter =
+        VerticalRecyclerViewAdapter(
+            squareGrid = arrayListOf(),
+            onRowItemDelete = { rowPosition, itemPosition ->
+                viewModel.squareGrid[rowPosition].squares.removeAt(itemPosition)
+            },
+            onRowRemoved = { rowPosition ->
+                viewModel.squareGrid.removeAt(rowPosition)
+            }
+        )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,12 +77,17 @@ class MainActivity : AppCompatActivity() {
 
         mainBinding.resetButton.setOnClickListener {
             generateGridAndShow()
+            mainBinding.verticalRv.smoothScrollToPosition(0)
         }
 
         mainBinding.verticalRv.adapter = adapter
         mainBinding.verticalRv.setHasFixedSize(true)
 
-        generateGridAndShow()
+        if (viewModel.squareGrid.isEmpty()) {
+            generateGridAndShow()
+        } else {
+            adapter.resetList(viewModel.squareGrid)
+        }
     }
 
     private fun generateGridAndShow() {

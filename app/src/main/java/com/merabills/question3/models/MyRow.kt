@@ -1,6 +1,5 @@
 package com.merabills.question3.models
 
 data class MyRow(
-    val squares: ArrayList<MySquare>,
-    val isAdded: Boolean = true
+    var squares: ArrayList<MySquare>
 )
